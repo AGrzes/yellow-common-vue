@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Yellow common vue code",
   "main": "target",
+  "types": "src",
   "scripts": {
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "test": "nyc mocha test/**/*.{ts,tsx}",
