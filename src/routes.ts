@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { RouteConfig } from 'vue-router'
+import VueRouter, { RouteConfig } from 'vue-router'
 
 export const handleRoute = (handler: (vm, route) => void) => ({
   beforeRouteEnter(to, from, next) {
@@ -88,4 +88,13 @@ export const itemHandler = (options: ItemHandlerOptions): RouteConfig => {
         })
     })
   }
+}
+
+export const router = (routes: RouteConfig[]): VueRouter => {
+  Vue.use(VueRouter)
+  return new VueRouter({
+    mode: 'history',
+    routes,
+    linkActiveClass: 'active'
+  })
 }
