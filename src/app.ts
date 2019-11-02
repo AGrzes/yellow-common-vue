@@ -10,6 +10,7 @@ export const app = (options: AppConfig = {}) => {
   const element = options.element || 'app'
   const vueOptions: any = {
     el: `body #${element}`,
+    template: `<router-view></router-view>`,
     data: {
     }
   }

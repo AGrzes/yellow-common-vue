@@ -36,8 +36,8 @@ export const listHandler = (options: ListHandlerOptions): RouteConfig => {
   const itemProperty = options.itemProperty || name
   const fetch = options.fetch || options.fetchGenerator()
   return {
-    name: listName,
-    path: `/${listName}`,
+    name: `${name}-list`,
+    path: `${listName}`,
     component: Vue.extend({
       template: containerWrapper(`<${control} v-for="${name} in ${listName}" :${itemProperty}="${name}"></${control}>`),
         data() {
@@ -75,7 +75,7 @@ export const itemHandler = (options: ItemHandlerOptions): RouteConfig => {
   const fetch = options.fetch || options.fetchGenerator()
   return {
     name,
-    path: `/${listName}/:${name}`,
+    path: `${listName}/:${name}`,
     component: Vue.extend({
       template: containerWrapper(`<${control} :${itemProperty}="${name}" v-if="${name}"></${control}>`),
         data() {
