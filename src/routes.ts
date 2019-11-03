@@ -23,12 +23,14 @@ interface HandlerOptions {
   listPath?(name: string): string
   itemPath?(name: string): string
   itemControl?(name: string): string
+  itemKeyProperty?(name: string): string
 }
 interface ListHandlerOptions  {
   name: string
   path?: string
   control?: string
   itemProperty?: string
+  itemKey?: string
   fetch?(): Promise<any[]>
   containerWrapper?(content: string): string
 }
@@ -53,6 +55,7 @@ export class HandlerGenerator {
     this.options.listPath = this.options.listPath || ((name) => `${name}`)
     this.options.itemPath = this.options.itemPath || ((name) => `${this.options.listPath(name)}/:${this.options.itemProperty(name)}`)
     this.options.itemControl = this.options.itemControl || ((name) => `${name}-details`)
+    this.options.itemKeyProperty = this.options.itemKeyProperty || ((name) => '_id')
   }
 
   public list(options: ListHandlerOptions): RouteConfig {
@@ -62,12 +65,13 @@ export class HandlerGenerator {
     const control = options.control || this.options.listControl(name)
     const itemProperty = options.itemProperty || this.options.itemProperty(name)
     const fetch = options.fetch || this.options.listFetchGenerator(name)
+    const key = options.itemKey || this.options.itemKeyProperty(name)
     return {
       name: `${name}-list`,
       path,
       component: Vue.extend({
         template: containerWrapper(`
-<${control} v-for="item in list" :${itemProperty}="item"></${control}>
+<${control} v-for="item in list" :${itemProperty}="item" :key="item.${key}"></${control}>
         `),
           data() {
             return {
