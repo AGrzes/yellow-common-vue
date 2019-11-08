@@ -20,9 +20,10 @@ export function listComponent({name, label, secondaryLabel}: {name: string, labe
 export interface FieldDescriptor {
   name: string
   section?: string
-  kind?: 'string' | 'reference' | 'enum'
+  kind?: 'string' | 'reference' | 'enum' | 'nested'
   target?: string
-  multiplicity?: 'single' | 'multiple'
+  multiplicity?: 'single' | 'multiple',
+  fields?: FieldDescriptor[]
 }
 
 function groupFields(groups: string[], fields: FieldDescriptor[]): {[group: string]: FieldDescriptor[]} {
@@ -64,7 +65,7 @@ export function components() {
   Vue.component('text-single', {
     props: ['field', 'item'],
     template:  `
-    <span>{{value}}</span>
+    <span class="mr-1">{{value}}</span>
     `,
     computed: {
       value() {
@@ -88,7 +89,7 @@ export function components() {
   Vue.component('enum-single', {
     props: ['field', 'item'],
     template:  `
-    <span class="badge badge-primary">{{value}}</span>
+    <span class="badge badge-primary mr-1">{{value}}</span>
     `,
     computed: {
       value() {
@@ -113,7 +114,7 @@ export function components() {
     props: ['field', 'item'],
     template:  `
     <span>
-      <router-link :to="to(value)">{{value}}</router-link>
+      <router-link :to="to(value)" class="mr-1">{{value}}</router-link>
     </span>
     `,
     computed: {
@@ -156,6 +157,52 @@ export function components() {
           }
         }
       }
+    }
+  })
+
+  Vue.component('nested-single', {
+    props: ['field', 'item'],
+    template:  `
+    <span class="mr-1">
+      <component :is="resolveComponent(nestedField,{inline:true},value)"
+        :field="nestedField"
+        :item="value"
+        v-for="nestedField in field.fields"
+        :key="nestedField.name">
+      </component>
+    </span>
+    `,
+    computed: {
+      value() {
+        return ensureSingle(this.item[this.field.name])
+      }
+    },
+    methods: {
+      resolveComponent
+    }
+  })
+
+  Vue.component('nested-bag', {
+    props: ['field', 'item'],
+    template:  `
+    <span>
+      <span v-for="value in values" class="mr-1">
+        <component :is="resolveComponent(nestedField,{inline:true},value)"
+          :field="nestedField"
+          :item="value"
+          v-for="nestedField in field.fields"
+          :key="nestedField.name">
+        </component>
+      </span>
+    <span>
+    `,
+    computed: {
+      values() {
+        return ensureMultiple(this.item[this.field.name])
+      }
+    },
+    methods: {
+      resolveComponent
     }
   })
 
@@ -257,16 +304,84 @@ export function components() {
     }
   })
 
+  Vue.component('nested-block', {
+    props: ['field', 'item'],
+    template:  `
+    <div class="card">
+      <div class="card-body">
+        <component :is="resolveComponent(nestedField,{inline:true},value)"
+          :field="nestedField"
+          :item="value"
+          v-for="nestedField in sections.inline"
+          :key="nestedField.name">
+        </component>
+        <component :is="resolveComponent(nestedField,{block:true},value)"
+          :field="nestedField"
+          :item="value"
+          v-for="nestedField in sections.default"
+          :key="nestedField.name">
+        </component>
+      </div>
+    </div>
+    `,
+    computed: {
+      value() {
+        return ensureSingle(this.item[this.field.name])
+      },
+      sections(): {[section: string]: FieldDescriptor[]} {
+        return groupFields(['inline'], this.field.fields)
+      }
+    },
+    methods: {
+      resolveComponent
+    }
+  })
+
+  Vue.component('nested-list', {
+    props: ['field', 'item'],
+    template:  `
+    <div class="card mt-1">
+      <div class="card-body" v-for="value in values">
+        <component :is="resolveComponent(nestedField,{inline:true},value)"
+          :field="nestedField"
+          :item="value"
+          v-for="nestedField in sections.inline"
+          :key="nestedField.name">
+        </component>
+        <component :is="resolveComponent(nestedField,{block:true},value)"
+          :field="nestedField"
+          :item="value"
+          v-for="nestedField in sections.default"
+          :key="nestedField.name">
+        </component>
+      </div>
+    </div>
+    `,
+    computed: {
+      values() {
+        return ensureMultiple(this.item[this.field.name])
+      },
+      sections(): {[section: string]: FieldDescriptor[]} {
+        return groupFields(['inline'], this.field.fields)
+      }
+    },
+    methods: {
+      resolveComponent
+    }
+  })
+
   const inlineComponents = {
     single: {
       string: 'text-single',
       reference: 'reference-single',
-      enum: 'enum-single'
+      enum: 'enum-single',
+      nested: 'nested-single'
     },
     multiple: {
       string: 'text-bag',
       reference: 'reference-bag',
-      enum: 'enum-bag'
+      enum: 'enum-bag',
+      nested: 'nested-bag'
     }
   }
 
@@ -274,12 +389,14 @@ export function components() {
     single: {
       string: 'text-block',
       reference: 'reference-block',
-      enum: 'enum-block'
+      enum: 'enum-block',
+      nested: 'nested-block'
     },
     multiple: {
       string: 'text-list',
       reference: 'reference-list',
-      enum: 'enum-list'
+      enum: 'enum-list',
+      nested: 'nested-list'
     }
   }
 
