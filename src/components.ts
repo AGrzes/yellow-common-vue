@@ -1,3 +1,4 @@
+import * as _ from 'lodash'
 import Vue from 'vue'
 
 export function listComponent({name, label, secondaryLabel}: {name: string, label?: string, secondaryLabel?: string}) {
@@ -19,7 +20,7 @@ export function listComponent({name, label, secondaryLabel}: {name: string, labe
 export interface FieldDescriptor {
   name: string
   section?: string
-  kind?: 'string' | 'reference'
+  kind?: 'string' | 'reference' | 'enum'
   target?: string
   multiplicity?: 'single' | 'multiple'
 }
@@ -76,6 +77,30 @@ export function components() {
     props: ['field', 'item'],
     template:  `
     <span><span v-for="value in values" class="mr-1">{{value}}</span><span>
+    `,
+    computed: {
+      values() {
+        return ensureMultiple(this.item[this.field.name])
+      }
+    }
+  })
+
+  Vue.component('enum-single', {
+    props: ['field', 'item'],
+    template:  `
+    <span class="badge badge-primary">{{value}}</span>
+    `,
+    computed: {
+      value() {
+        return ensureSingle(this.item[this.field.name])
+      }
+    }
+  })
+
+  Vue.component('enum-bag', {
+    props: ['field', 'item'],
+    template:  `
+    <span><span v-for="value in values" class="mr-1 badge badge-primary">{{value}}</span><span>
     `,
     computed: {
       values() {
@@ -158,6 +183,30 @@ export function components() {
     }
   })
 
+  Vue.component('enum-block', {
+    props: ['field', 'item'],
+    template:  `
+    <div><span class="badge badge-primary">{{value}}</span></div>
+    `,
+    computed: {
+      value() {
+        return ensureSingle(this.item[this.field.name])
+      }
+    }
+  })
+
+  Vue.component('enum-list', {
+    props: ['field', 'item'],
+    template:  `
+    <div><span v-for="value in values" class="mr-1 badge badge-primary">{{value}}</span></div>
+    `,
+    computed: {
+      values() {
+        return ensureMultiple(this.item[this.field.name])
+      }
+    }
+  })
+
   Vue.component('reference-block', {
     props: ['field', 'item'],
     template:  `
@@ -211,22 +260,26 @@ export function components() {
   const inlineComponents = {
     single: {
       string: 'text-single',
-      reference: 'reference-single'
+      reference: 'reference-single',
+      enum: 'enum-single'
     },
     multiple: {
       string: 'text-bag',
-      reference: 'reference-bag'
+      reference: 'reference-bag',
+      enum: 'enum-bag'
     }
   }
 
   const blockComponents = {
     single: {
       string: 'text-block',
-      reference: 'reference-block'
+      reference: 'reference-block',
+      enum: 'enum-block'
     },
     multiple: {
       string: 'text-list',
-      reference: 'reference-list'
+      reference: 'reference-list',
+      enum: 'enum-list'
     }
   }
 
