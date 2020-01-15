@@ -7,6 +7,6 @@ export {Vue}
 import VueRouter from 'vue-router'
 export {VueRouter}
 
-export const bootstrap = () => {
-  import('./bootstrap')
+export const bootstrap = async () => {
+  await import('./bootstrap')
 }
