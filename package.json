@@ -10,7 +10,8 @@
     "build": "rm -rf target && tsc",
     "watch": "tsc -w --incremental",
     "format": "tslint 'src/**/*.ts' --fix",
-    "lint": "tslint 'src/**/*.ts'"
+    "lint": "tslint 'src/**/*.ts'",
+    "install": "npm run build"
   },
   "nyc": {
     "all": true,
